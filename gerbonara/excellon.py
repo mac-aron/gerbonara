@@ -1031,6 +1031,20 @@ class ExcellonParser(object):
         self.found_kicad_format_comment = True
         self.settings.notation = match[2]
         self.settings.unit = Inch if match[3] == 'inch' else MM
+        
+    @exprs.match('; #@! TA\.AperFunction,(Plated|Non-Plated|Unplated),PTH,ViaDrill')
+    def parse_kicad_tf_file_function(self, match):
+        """
+        This is added by myself, Aron Eggens to fix the issue with all drill going to layer unknown
+        Parse the TF.FileFunction line to determine if the drill is plated or not.
+        Args:
+            match: The regex match object containing the matched groups.
+        """
+        plating_info = match.group(1)  # Get the plating status from the regex group
+        if plating_info == 'Plated':
+            self.is_plated = True
+        else:
+            self.is_plated = False
 
     @exprs.match(';(.*)')
     def parse_comment(self, match):
